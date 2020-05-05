@@ -10,7 +10,7 @@ import time
 
 class Band:
     def __init__(self, band_id, band_name=""):
-        self.band_name = band_name.encode('utf-8')
+        self.band_name = band_name
         self.band_id = str(band_id)
 
     def __eq__(self, other):
@@ -25,7 +25,7 @@ class Band:
 
 class Album:
     def __init__(self, album_id, album_name, art_id):
-        self.album_name = album_name.encode('utf-8')
+        self.album_name = album_name
         self.art_id = art_id
         self.album_id = album_id
 
@@ -35,7 +35,7 @@ class Album:
 
 class Track:
     def __init__(self, track_name, file, duration, number=0):
-        self.track_name = track_name.encode('utf-8')
+        self.track_name = track_name
         self.file = file
         self.duration = duration
         self.number = number
@@ -75,7 +75,7 @@ class Bandcamp:
         url = "https://bandcamp.com/api/discover/3/get_web?g={genre}&t={sub_genre}&s={slice}&p={page}&f=all" \
             .format(genre=genre, sub_genre=sub_genre, slice=slice, page=page)
         request = requests.get(url)
-        items = json.loads(request.content.decode('utf-8'))['items']
+        items = json.loads(request.text)['items']
         discover_list = {}
         for item in items:
             track = Track(item['featured_track']['title'], item['featured_track']['file']['mp3-128'],
@@ -83,6 +83,7 @@ class Bandcamp:
             album = Album(album_id=item['id'], album_name=item['primary_text'], art_id=item['art_id'])
             band = Band(band_id=item['band_id'], band_name=item['secondary_text'])
             discover_list[band] = {album: [track]}
+        print("got", genre, sub_genre, slice)
         return discover_list
 
     def get_fan_id(self):
@@ -114,7 +115,7 @@ class Bandcamp:
         url = "https://bandcamp.com/EmbeddedPlayer/album={album_id}".format(album_id=album_id)
         request = requests.get(url)
         parser = _PlayerDataParser()
-        content = request.content.decode('utf-8')
+        content = request.text
         parser.feed(content)
         player_data = parser.player_data
         track_list = []
